@@ -1,0 +1,61 @@
+{
+  "name": "root-status",
+  "version": "1.0.0",
+  "authors": [
+    "ROOTKIT"
+  ],
+  "description": "",
+  "dependencies": {
+    "@ethersproject/experimental": "^5.0.1",
+    "@uniswap/sdk": "3.0.3",
+    "@uniswap/token-lists": "^1.0.0-beta.17",
+    "@uniswap/v2-core": "1.0.0",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@web3-react/core": "^6.0.9",
+    "@web3-react/fortmatic-connector": "^6.0.9",
+    "@web3-react/injected-connector": "^6.0.7",
+    "@web3-react/portis-connector": "^6.0.9",
+    "@web3-react/walletconnect-connector": "^6.1.1",
+    "@web3-react/walletlink-connector": "^6.0.9",
+    "array-move": "^2.1.0",
+    "axios": "^0.18.1",
+    "jazzicon": "^1.5.0",
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
+    "react-app-rewire-styled-components": "^3.0.2",
+    "react-app-rewired": "^2.1.6",
+    "react-cool-onclickoutside": "^1.5.8",
+    "react-device-detect": "^1.14.0",
+    "react-dom": "^16.7.0",
+    "react-feather": "^2.0.8",
+    "react-i18next": "^10.7.0",
+    "react-redux": "^7.2.0",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^3.4.0",
+    "react95": "^3.2.0",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0",
+    "styled-components": "^4.2.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "firebase-tools": "^7.14.0",
+    "redux-devtools-extension": "^2.13.7"
+  }
+}
