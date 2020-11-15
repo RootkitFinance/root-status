@@ -225,24 +225,24 @@ const HomePage = () => {
           {getAddressText(state.owner, false)}
         </AddressLink>
         {state.name === "FLOOR_CALCULATOR" ? (
-          <p>
+          <Note>
             (The owner doesn't matter because there aren't any owner-only
             functions)
-          </p>
+          </Note>
         ) : state.name === "TRANSFER_GATE" ? (
-          <p>
+          <Note>
             (The concern with the transfer gate was setParameters would let us
             set a tax rate of 100%. All transfers could be redirected to devs.
             Essentially a rug, albeit super unconventional, and could only rug
             down to the floor. But it was fixed by adding hard-coded caps that
             the owner cannot override.)
-          </p>
+          </Note>
         ) : state.name === "DISTRIBUTION" ? (
-          <p>
+          <Note>
             (Once a sale starts, the only relevant owner-only functions are
             setJengaCount and distribute, which are used to end the sale and
             complete the distribution. There is no opportunity to rug.)
-          </p>
+          </Note>
         ) : null}
       </p>
     </div>
@@ -274,13 +274,12 @@ const HomePage = () => {
           {getAddressText(state.owner, false)}
         </AddressLink>
         {state.name === "STONEFACE_1" ? (
-          <p>(Owner actions are delayed by 7 days)</p>
+          <Note>(Owner actions are delayed by 7 days)</Note>
         ) : state.name === "STONEFACE_2" ? (
-          <p>(Owner actions are delayed by 3 days)</p>
+          <Note>(Owner actions are delayed by 3 days)</Note>
         ) : null}
         {state.watching !== "0x0000000000000000000000000000000000000000" ? (
           <>
-            <br />
             Watching:
             <AddressLink
               target="_blank"
@@ -419,4 +418,9 @@ const AddressLink = styled.a`
   :hover {
     color: orange;
   }
+`;
+
+const Note = styled.div`
+  opacity: 0.6;
+  font-style: italic;
 `;
