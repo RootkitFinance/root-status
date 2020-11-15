@@ -39,38 +39,46 @@ const HomePage = () => {
   const { library, account } = useActiveWeb3React();
 
   const [stoneface1State, setStoneface1State] = useState({
+    name: "STONEFACE_1",
     address: contractAddresses.STONEFACE_1,
     owner: undefined,
     watching: undefined,
     transfers: undefined,
   });
   const [stoneface2State, setStoneface2State] = useState({
+    name: "STONEFACE_2",
     address: contractAddresses.STONEFACE_2,
     owner: undefined,
     watching: undefined,
     transfers: undefined,
   });
   const [distributionState, setDistributionState] = useState({
+    name: "DISTRIBUTION",
     address: contractAddresses.DISTRIBUTION,
     owner: undefined,
   });
   const [vaultState, setVaultState] = useState({
+    name: "VAULT",
     address: contractAddresses.VAULT,
     owner: undefined,
   });
   const [transferGateState, setTransferGateState] = useState({
+    name: "TRANSFER_GATE",
     address: contractAddresses.TRANSFER_GATE,
     owner: undefined,
   });
   const [floorCalculatorState, setFloorCalculatorState] = useState({
-    address: contractAddresses.TRANSFER_GATE,
+    name: "FLOOR_CALCULATOR",
+    address: contractAddresses.FLOOR_CALCULATOR,
     owner: undefined,
   });
   const [rootState, setRootState] = useState({
+    name: "ROOT",
     address: contractAddresses.ROOT,
     owner: undefined,
   });
   const [kethState, setKethState] = useState({
+    name: "KETH",
     address: contractAddresses.KETH,
     owner: undefined,
   });
@@ -216,6 +224,26 @@ const HomePage = () => {
         >
           {getAddressText(state.owner, false)}
         </AddressLink>
+        {state.name === "FLOOR_CALCULATOR" ? (
+          <p>
+            (The owner doesn't matter because there aren't any owner-only
+            functions)
+          </p>
+        ) : state.name === "TRANSFER_GATE" ? (
+          <p>
+            (The concern with the transfer gate was setParameters would let us
+            set a tax rate of 100%. All transfers could be redirected to devs.
+            Essentially a rug, albeit super unconventional, and could only rug
+            down to the floor. But it was fixed by adding hard-coded caps that
+            the owner cannot override.)
+          </p>
+        ) : state.name === "DISTRIBUTION" ? (
+          <p>
+            (Once a sale starts, the only relevant owner-only functions are
+            setJengaCount and distribute, which are used to end the sale and
+            complete the distribution. There is no opportunity to rug.)
+          </p>
+        ) : null}
       </p>
     </div>
   );
@@ -245,6 +273,11 @@ const HomePage = () => {
         >
           {getAddressText(state.owner, false)}
         </AddressLink>
+        {state.name === "STONEFACE_1" ? (
+          <p>(Owner actions are delayed by 7 days)</p>
+        ) : state.name === "STONEFACE_2" ? (
+          <p>(Owner actions are delayed by 3 days)</p>
+        ) : null}
         {state.watching !== "0x0000000000000000000000000000000000000000" ? (
           <>
             <br />
@@ -367,7 +400,7 @@ const HomePage = () => {
         <ContractWatcher name="Distribution" state={distributionState} />
         <ContractWatcher name="Vault" state={vaultState} />
         <ContractWatcher name="TransferGate" state={transferGateState} />
-        <ContractWatcher name="FloorCalculator" state={transferGateState} />
+        <ContractWatcher name="FloorCalculator" state={floorCalculatorState} />
         <ContractWatcher name="ROOT" state={rootState} />
         <ContractWatcher name="KETH" state={kethState} />
       </div>
