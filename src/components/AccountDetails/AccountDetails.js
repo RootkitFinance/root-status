@@ -1,34 +1,15 @@
-import React, { useCallback, useContext } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import styled, { ThemeContext } from "styled-components";
+import styled from "styled-components";
 import { useActiveWeb3React } from "../../hooks";
-//import { clearAllTransactions } from '../../state/transactions/actions'
 import { shortenAddress } from "../../utils";
-import { AutoRow } from "../Row";
-import Transaction from "./Transaction";
 
 import { SUPPORTED_WALLETS } from "../../constants";
-import { ReactComponent as Close } from "../../assets/img/x.svg";
 import { getEtherscanLink } from "../../utils";
-import {
-  injected,
-  walletconnect,
-  walletlink,
-  fortmatic,
-  portis,
-} from "../../connectors";
+import { injected, walletconnect } from "../../connectors";
 import WalletConnectIcon from "../../assets/img/walletConnectIcon.svg";
 import Identicon from "../Identicon";
 import { ExternalLink as LinkIcon } from "react-feather";
-
-const HeaderRow = styled.div`
-  ${({ theme }) => theme.flexRowNoWrap};
-  padding: 1rem 1rem;
-  font-weight: 500;
-  color: ${(props) =>
-    props.color === "blue" ? ({ theme }) => theme.primary1 : "inherit"};
-  padding: 1rem;
-`;
 
 const UpperSection = styled.div`
   position: relative;
@@ -73,22 +54,6 @@ const YourAccount = styled.div`
   }
 `;
 
-const LowerSection = styled.div`
-  ${({ theme }) => theme.flexColumnNoWrap}
-  padding: 1.5rem;
-  flex-grow: 1;
-  overflow: auto;
-  background-color: ${({ theme }) => theme.bg2};
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-
-  h5 {
-    margin: 0;
-    font-weight: 400;
-    color: ${({ theme }) => theme.text3};
-  }
-`;
-
 const AccountControl = styled.div`
   display: flex;
   justify-content: space-between;
@@ -122,22 +87,6 @@ const AddressLink = styled.a`
   }
 `;
 
-const CloseIcon = styled.div`
-  position: absolute;
-  right: 1rem;
-  top: 14px;
-  &:hover {
-    cursor: pointer;
-    opacity: 0.6;
-  }
-`;
-
-const CloseColor = styled(Close)`
-  path {
-    stroke: ${({ theme }) => theme.text4};
-  }
-`;
-
 const WalletName = styled.div`
   width: initial;
   font-size: 0.825rem;
@@ -158,10 +107,6 @@ const IconWrapper = styled.div`
   align-items: flex-end;
 `;
 
-const TransactionListWrapper = styled.div`
-  ${({ theme }) => theme.flexColumnNoWrap};
-`;
-
 const WalletAction = styled.button`
   width: fit-content;
   font-weight: 400;
@@ -174,20 +119,6 @@ const WalletAction = styled.button`
   }
 `;
 
-const MainWalletAction = styled(WalletAction)`
-  color: ${({ theme }) => theme.primary1};
-`;
-
-function renderTransactions(transactions) {
-  return (
-    <TransactionListWrapper>
-      {transactions.map((hash, i) => {
-        return <Transaction key={i} hash={hash} />;
-      })}
-    </TransactionListWrapper>
-  );
-}
-
 export default function AccountDetails({
   toggleWalletModal,
   pendingTransactions,
@@ -196,8 +127,6 @@ export default function AccountDetails({
   openOptions,
 }) {
   const { chainId, account, connector } = useActiveWeb3React();
-  const theme = useContext(ThemeContext);
-  const dispatch = useDispatch();
 
   function formatConnectorName() {
     const { ethereum } = window;
@@ -229,11 +158,6 @@ export default function AccountDetails({
     return null;
   }
 
-  const clearAllTransactions = () => {};
-  const clearAllTransactionsCallback = useCallback(() => {
-    if (chainId) dispatch(clearAllTransactions({ chainId }));
-  }, [dispatch, chainId]);
-
   return (
     <>
       <UpperSection>
@@ -243,7 +167,7 @@ export default function AccountDetails({
               <AccountGroupingRow>
                 {formatConnectorName()}
                 <div>
-                  {connector !== injected && connector !== walletlink && (
+                  {connector !== injected && (
                     <WalletAction
                       style={{
                         fontSize: ".825rem",
@@ -336,24 +260,6 @@ export default function AccountDetails({
           </YourAccount>
         </AccountSection>
       </UpperSection>
-      {/* {!!pendingTransactions.length || !!confirmedTransactions.length ? (
-        <LowerSection>
-          <AutoRow mb={"1rem"} style={{ justifyContent: "space-between" }}>
-            <TYPE.body>Recent Transactions</TYPE.body>
-            <LinkStyledButton onClick={clearAllTransactionsCallback}>
-              (clear all)
-            </LinkStyledButton>
-          </AutoRow>
-          {renderTransactions(pendingTransactions)}
-          {renderTransactions(confirmedTransactions)}
-        </LowerSection>
-      ) : (
-        <LowerSection>
-          <TYPE.body color={theme.text1}>
-            Your transactions will appear here...
-          </TYPE.body>
-        </LowerSection>
-      )} */}
     </>
   );
 }

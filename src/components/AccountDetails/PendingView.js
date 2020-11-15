@@ -1,4 +1,3 @@
-import { AbstractConnector } from "@web3-react/abstract-connector";
 import React from "react";
 import styled from "styled-components";
 import Option from "../Option/Option";
