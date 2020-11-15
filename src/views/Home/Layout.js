@@ -41,42 +41,42 @@ const HomePage = () => {
 
   const [distributionState, setDistributionState] = useState({
     address: contractAddresses.DISTRIBUTION,
-    owner: "Connect wallet...",
+    owner: undefined,
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Connect wallet...",
-    stonefaceWatching: "Connect wallet...",
+    stonefaceOwner: undefined,
+    stonefaceWatching: undefined,
     transfers: [],
   });
   const [vaultState, setVaultState] = useState({
     address: contractAddresses.VAULT,
-    owner: "Connect wallet...",
+    owner: undefined,
     stonefaceAddress: contractAddresses.STONEFACE_2,
-    stonefaceOwner: "Connect wallet...",
-    stonefaceWatching: "Connect wallet...",
+    stonefaceOwner: undefined,
+    stonefaceWatching: undefined,
     transfers: [],
   });
   const [gateState, setGateState] = useState({
     address: contractAddresses.GATE,
-    owner: "Connect wallet...",
+    owner: undefined,
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Connect wallet...",
-    stonefaceWatching: "Connect wallet...",
+    stonefaceOwner: undefined,
+    stonefaceWatching: undefined,
     transfers: [],
   });
   const [kethState, setKethState] = useState({
     address: contractAddresses.KETH,
-    owner: "Connect wallet...",
+    owner: undefined,
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Connect wallet...",
-    stonefaceWatching: "Connect wallet...",
+    stonefaceOwner: undefined,
+    stonefaceWatching: undefined,
     transfers: [],
   });
   const [rootkitState, setRootkitState] = useState({
     address: contractAddresses.ROOTKIT,
-    owner: "Connect wallet...",
+    owner: undefined,
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Connect wallet...",
-    stonefaceWatching: "Connect wallet...",
+    stonefaceOwner: undefined,
+    stonefaceWatching: undefined,
     transfers: [],
   });
 
@@ -155,9 +155,11 @@ const HomePage = () => {
   }, [library, account]);
 
   const getAddressText = (address) => {
-    const id = Object.keys(addressToName).indexOf(address);
-    console.log(addressToName, address);
-    return `${address} (#${id + 1} - ${addressToName[address]})`;
+    return address
+      ? `${address} (#${Object.keys(addressToName).indexOf(address) + 1} - ${
+          addressToName[address]
+        })`
+      : "Connect wallet...";
   };
 
   const ContractWatcher = ({ name, state }) => (
