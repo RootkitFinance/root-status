@@ -41,42 +41,42 @@ const HomePage = () => {
 
   const [distributionState, setDistributionState] = useState({
     address: contractAddresses.DISTRIBUTION,
-    owner: "Loading...",
+    owner: "Connect wallet...",
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Loading...",
-    stonefaceWatching: "Loading...",
+    stonefaceOwner: "Connect wallet...",
+    stonefaceWatching: "Connect wallet...",
     transfers: [],
   });
   const [vaultState, setVaultState] = useState({
     address: contractAddresses.VAULT,
-    owner: "Loading...",
+    owner: "Connect wallet...",
     stonefaceAddress: contractAddresses.STONEFACE_2,
-    stonefaceOwner: "Loading...",
-    stonefaceWatching: "Loading...",
+    stonefaceOwner: "Connect wallet...",
+    stonefaceWatching: "Connect wallet...",
     transfers: [],
   });
   const [gateState, setGateState] = useState({
     address: contractAddresses.GATE,
-    owner: "Loading...",
+    owner: "Connect wallet...",
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Loading...",
-    stonefaceWatching: "Loading...",
+    stonefaceOwner: "Connect wallet...",
+    stonefaceWatching: "Connect wallet...",
     transfers: [],
   });
   const [kethState, setKethState] = useState({
     address: contractAddresses.KETH,
-    owner: "Loading...",
+    owner: "Connect wallet...",
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Loading...",
-    stonefaceWatching: "Loading...",
+    stonefaceOwner: "Connect wallet...",
+    stonefaceWatching: "Connect wallet...",
     transfers: [],
   });
   const [rootkitState, setRootkitState] = useState({
     address: contractAddresses.ROOTKIT,
-    owner: "Loading...",
+    owner: "Connect wallet...",
     stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: "Loading...",
-    stonefaceWatching: "Loading...",
+    stonefaceOwner: "Connect wallet...",
+    stonefaceWatching: "Connect wallet...",
     transfers: [],
   });
 
@@ -255,6 +255,7 @@ const HomePage = () => {
         <div
           css={css`
             text-align: center;
+            margin-bottom: 20px;
           `}
         >
           <div
