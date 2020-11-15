@@ -293,7 +293,7 @@ const HomePage = () => {
             padding: 40px 0;
           `}
         >
-          <h1>Contracts</h1>
+          <h1>Address List</h1>
           {Object.keys(contractAddresses).map((key, index) => (
             <p>
               {index + 1}. {key}:
