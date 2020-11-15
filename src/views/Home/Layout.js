@@ -246,8 +246,8 @@ const HomePage = () => {
             fontStyle: "italic",
           }}
         >
-          Stoneface executes critical Rootkit contracts with a time delay. This
-          makes Rootkit effectively rugproof.
+          Stoneface owns all contracts. Stoneface executes critical Rootkit
+          contracts with a time delay.
         </h2>
         <br />
         <br />

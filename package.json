@@ -43,7 +43,7 @@
     "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "deploy": "yarn build && cp -R ./build/* ./docs && git pull && git add -A && git commit -m 'Update' && git push"
+    "deploy": "yarn build && cp -R ./build/* ./docs && git pull && git add -A && git commit -m 'Deploy' && git push"
   },
   "eslintConfig": {
     "extends": "react-app"
