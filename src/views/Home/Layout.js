@@ -271,9 +271,7 @@ const HomePage = () => {
           padding: 50px 30px;
         `}
       >
-        <h1 style={{ marginTop: 10, marginBottom: 0 }}>
-          Welcome to Rootkit Status
-        </h1>
+        <h1 style={{ marginTop: 10, marginBottom: 0 }}>Rootkit Status</h1>
         <h2
           style={{
             textAlign: "center",
