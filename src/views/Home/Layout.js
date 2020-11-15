@@ -186,7 +186,7 @@ const HomePage = () => {
     >
       <h1>{name}</h1>
       <p>
-        {name} Address:
+        Address:
         <AddressLink
           target="_blank"
           href={getEtherscanLink(chainId, state.address, "address")}
@@ -194,7 +194,7 @@ const HomePage = () => {
           {getAddressText(state.address, false)}
         </AddressLink>
         <br />
-        {name} Owner Address:
+        Owner:
         <AddressLink
           target="_blank"
           href={getEtherscanLink(chainId, state.owner, "address")}
@@ -215,7 +215,7 @@ const HomePage = () => {
     >
       <h1>{name}</h1>
       <p>
-        {name} Address:
+        Address:
         <AddressLink
           target="_blank"
           href={getEtherscanLink(chainId, state.address, "address")}
@@ -223,7 +223,7 @@ const HomePage = () => {
           {getAddressText(state.address, false)}
         </AddressLink>
         <br />
-        {name} Owner Address:
+        Owner:
         <AddressLink
           target="_blank"
           href={getEtherscanLink(chainId, state.owner, "address")}
@@ -231,7 +231,7 @@ const HomePage = () => {
           {getAddressText(state.owner, false)}
         </AddressLink>
         <br />
-        {name} Watching Address:
+        Watching:
         <AddressLink
           target="_blank"
           href={getEtherscanLink(chainId, state.watching, "address")}
