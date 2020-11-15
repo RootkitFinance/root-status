@@ -26,7 +26,6 @@ const contractAddresses = {
   KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
   FLOOR_CALCULATOR: "0x621642243CC6bE2D18b451e2386c52d1e9f7eDF6",
   ROOTKIT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
-  VOID: "0x0000000000000000000000000000000000000000",
 };
 
 const addressToName = Object.assign(
@@ -235,14 +234,18 @@ const HomePage = () => {
         >
           {getAddressText(state.owner, false)}
         </AddressLink>
-        <br />
-        Watching:
-        <AddressLink
-          target="_blank"
-          href={getEtherscanLink(chainId, state.watching, "address")}
-        >
-          {getAddressText(state.watching, false)}
-        </AddressLink>
+        {state.watching !== "0x0000000000000000000000000000000000000000" ? (
+          <>
+            <br />
+            Watching:
+            <AddressLink
+              target="_blank"
+              href={getEtherscanLink(chainId, state.watching, "address")}
+            >
+              {getAddressText(state.watching, false)}
+            </AddressLink>
+          </>
+        ) : null}
       </p>
 
       <div
