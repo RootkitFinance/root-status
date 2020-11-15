@@ -1,126 +1,236 @@
-import React, { useEffect, useContext, useState } from "react";
-import { createGlobalStyle, ThemeContext } from "styled-components";
+import React, { useEffect, useState } from "react";
+import { createGlobalStyle } from "styled-components";
 import styled, { css } from "styled-components";
-import { useLocation } from "react-router-dom";
 import ethers from "ethers";
+import { Panel, Cutout } from "react95";
 
 import { useActiveWeb3React } from "../../hooks";
-import { getContract } from "../../utils";
+import { getContract, getEtherscanLink } from "../../utils";
 
-import Window from "../../components/Window/Window";
-import WindowIcon from "../../assets/img/pc.png";
-import BookIcon from "../../assets/img/book.png";
-import PlugIcon from "../../assets/img/plug.png";
-import RootkitLiquidityGenerationABI from "../../contracts/abi/RootKitLiquidityGeneration.json";
+import ConnectWallet from "../../components/ConnectWallet/ConnectWallet";
 
-const DistributionState = {
-  Initializing: 0,
-  Ready: 1,
-  Active: 2,
-  Broken: 3,
-  Completing: 4,
-  Complete: 5,
+import RootkitDistributionABI from "../../contracts/abi/RootKitDistribution.json";
+import StonefaceABI from "../../contracts/abi/Stoneface.json";
+import RootkitVaultABI from "../../contracts/abi/RootKitVault.json";
+import RootkitTransferGateABI from "../../contracts/abi/RootKitTransferGate.json";
+import KethABI from "../../contracts/abi/KETH.json";
+import RootkitABI from "../../contracts/abi/RootKit.json";
+
+const contractAddresses = {
+  DEPLOYER: "0x804CC8D469483d202c69752ce0304F71ae14ABdf",
+  STONEFACE_1: "0xB0684173F62815b2121C1030cA2423123bA81905",
+  STONEFACE_2: "0x95c017BeE88284bEf2253E3c347980EF2a0e2ec2",
+  LIQUIDITY_GENERATION: "0x4C66a6f06B8bC4243479121A4eF0061650e5D137",
+  DISTRIBUTION: "0xdc436261C356E136b1671442d0bD0Ae183a6d77D",
+  VAULT: "0xaa360Bd89Ac14533940114cf7205DdF5e0CA7fa6",
+  GATE: "0xbFDF833E65Bd8B27c84fbE55DD17F7648C532168",
+  KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
+  FLOOR_CALCULATOR: "0x621642243CC6bE2D18b451e2386c52d1e9f7eDF6",
+  ROOTKIT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
+  VOID: "0x0000000000000000000000000000000000000000",
 };
 
-const Icon = styled.img`
-  image-rendering: pixelated;
-  /* filter: grayscale(1); */
-  height: 24px;
-  display: inline-block;
-  padding-right: 8px;
-  ${({ theme }) =>
-    theme.name === "original"
-      ? `
-            filter: grayscale(100%) brightness(40%) sepia(100%) hue-rotate(50deg) saturate(5000%) contrast(1);
-          `
-      : ""}
-`;
-
-const DisconnectedIcon = () => (
-  <img
-    alt="connect"
-    src="data:image/gif;base64,R0lGODlhIAAgAKIHAICAAP//AICAgMDAwP///wAAAP8AAP///yH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDM2MCwgMjAyMC8wMi8xMy0wMTowNzoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjEgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkE0QzU0RDc4RkY3QjExRUFBQzgyRjAwNTZFODFEQkVGIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkE0QzU0RDc5RkY3QjExRUFBQzgyRjAwNTZFODFEQkVGIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QTRDNTRENzZGRjdCMTFFQUFDODJGMDA1NkU4MURCRUYiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QTRDNTRENzdGRjdCMTFFQUFDODJGMDA1NkU4MURCRUYiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFHgAHACwAAAAAIAAgAAADrni63P4wyklrK7hYO/rQ20SMxBdKQlqCJ7q2rglDwjs/tXw3ObsrvR/PJgQSi8GiUXfJnJJAFSlDda1S0pKWNPXxOjXSQDsukwVeHjZHbo+xaUeObS7D0ZTcANteFwAYeSUee2t+BAAAgoSEKRloAQQBiSh7jGBoiIADkZGUOBgpjI6diR2SRw6hAh6OnKimnEwQoZgYp5EfBR1xDwWscLeyGoEbv2gswr0UxU0NCQAh+QQJMgAHACwFAAYAFgAWAAADMmi6dv6OSQnhvK1GjDfn3neFYkmRomYu6pppxwdX8uy+z92u+e2ivJhPAaztUrDgcZEAACH5BAUeAAcALAAAAAAgACAAAAOGeLrc/jDKSau9OOv9Cp+D90HhSIpmU6Yqyirue8QvzdopXuw46ApAgpDAK1IIIWBQOEAOnzvJYCB4Nq9OLLV3UAa1WaeSq6hSw9qxgNxFUr/iMSA6MU+n3nyBAABQ7Hd3QDxrAQQBf1SBgmt8cwOGfztAi4OGAX1TF5MCjAWQh44yo6SlGwkAOw=="
-    css={css`
-      height: 23px;
-      width: 23px;
-      padding: 0px 0.2em;
-      margin-right: 8px;
-      ${({ theme }) =>
-        theme.name === "original"
-          ? `
-              filter: grayscale(100%) brightness(40%) sepia(100%) hue-rotate(50deg)
-      saturate(6000%) contrast(1);
-          `
-          : ""}
-    `}
-  />
+const addressToName = Object.assign(
+  {},
+  ...Object.entries(contractAddresses).map(([a, b]) => ({ [b]: a }))
 );
 
-const HomePage = ({
-  data,
-  showingFollowing,
-  showFollowing,
-  showTop,
-  position,
-  open,
-  active,
-  zIndex,
-  onChangePage,
-  onDragStart,
-  onDragStop,
-  onClose,
-  onFocus,
-}) => {
+const HomePage = () => {
+  const chainId = 1;
   const { library, account } = useActiveWeb3React();
-  const location = useLocation();
-  const theme = useContext(ThemeContext);
-  const [distributionState, setDistributionState] = useState(0);
-  const [totalContributed, setTotalContributed] = useState(0);
-  const [liquidityGenerationActive, setLiquidityGenerationActive] = useState(
-    true
-  );
+
+  const [distributionState, setDistributionState] = useState({
+    address: contractAddresses.DISTRIBUTION,
+    owner: "Loading...",
+    stonefaceAddress: contractAddresses.STONEFACE_1,
+    stonefaceOwner: "Loading...",
+    stonefaceWatching: "Loading...",
+    transfers: [],
+  });
+  const [vaultState, setVaultState] = useState({
+    address: contractAddresses.VAULT,
+    owner: "Loading...",
+    stonefaceAddress: contractAddresses.STONEFACE_2,
+    stonefaceOwner: "Loading...",
+    stonefaceWatching: "Loading...",
+    transfers: [],
+  });
+  const [gateState, setGateState] = useState({
+    address: contractAddresses.GATE,
+    owner: "Loading...",
+    stonefaceAddress: contractAddresses.STONEFACE_1,
+    stonefaceOwner: "Loading...",
+    stonefaceWatching: "Loading...",
+    transfers: [],
+  });
+  const [kethState, setKethState] = useState({
+    address: contractAddresses.KETH,
+    owner: "Loading...",
+    stonefaceAddress: contractAddresses.STONEFACE_1,
+    stonefaceOwner: "Loading...",
+    stonefaceWatching: "Loading...",
+    transfers: [],
+  });
+  const [rootkitState, setRootkitState] = useState({
+    address: contractAddresses.ROOTKIT,
+    owner: "Loading...",
+    stonefaceAddress: contractAddresses.STONEFACE_1,
+    stonefaceOwner: "Loading...",
+    stonefaceWatching: "Loading...",
+    transfers: [],
+  });
 
   useEffect(() => {
     if (library && account) {
-      loadDistributionState();
-    }
-  }, [library, account, loadDistributionState]);
+      async function loadState({ state, abi, onLoad }) {
+        const { address, stonefaceAddress } = state;
+        const contract = getContract(address, abi, library, account);
+        const stonefaceContract = getContract(
+          stonefaceAddress,
+          StonefaceABI,
+          library,
+          account
+        );
 
-  async function loadDistributionState() {
-    const contract = getContract(
-      process.env.REACT_APP_ROOTKIT_LIQUIDITY_GENERATION_ADDRESS,
-      RootkitLiquidityGenerationABI,
-      library,
-      account
-    );
+        const logs = await library.getLogs({
+          address,
+          fromBlock: 10961240,
+        });
 
-    //setLiquidityGenerationActive(await contract.isActive());
+        for (const log of logs) {
+          const event = contract.interface.parseLog(log);
 
-    //setDistributionState(await contract.state());
-  }
+          if (event.name === "PendingOwnershipTransfer") {
+            const target = event.args.target;
+            const newOwner = event.args.newOwner;
+            const when = event.args.when.toNumber();
 
-  if (!open) return <></>;
-  return (
-    <Window
-      title="Rootkit.exe"
-      icon={WindowIcon}
-      position={position}
-      zIndex={zIndex}
-      onDragStart={onDragStart}
-      onDragStop={onDragStop}
-      onClose={onClose}
-      onFocus={onFocus}
-      contentCss={css`
-        @media ${({ theme }) => theme.MEDIA_TABLET_OR_MORE} {
-          width: 800px;
-          height: 700px;
+            state.transfer.push({
+              target,
+              newOwner,
+              when,
+            });
+          }
         }
-      `}
-    >
+
+        state.owner = await contract.owner();
+        state.stonefaceWatching = await stonefaceContract.rootKitDistribution();
+        state.stonefaceOwner = await stonefaceContract.owner();
+
+        onLoad({
+          ...state,
+        });
+      }
+
+      loadState({
+        state: distributionState,
+        abi: RootkitDistributionABI,
+        onLoad: setDistributionState,
+      });
+
+      loadState({
+        state: vaultState,
+        abi: RootkitVaultABI,
+        onLoad: setVaultState,
+      });
+
+      loadState({
+        state: gateState,
+        abi: RootkitTransferGateABI,
+        onLoad: setGateState,
+      });
+
+      loadState({
+        state: kethState,
+        abi: KethABI,
+        onLoad: setKethState,
+      });
+
+      loadState({
+        state: rootkitState,
+        abi: RootkitABI,
+        onLoad: setRootkitState,
+      });
+    }
+  }, [library, account]);
+
+  const getAddressText = (address) => {
+    const id = Object.keys(addressToName).indexOf(address);
+    console.log(addressToName, address);
+    return `${address} (#${id + 1} - ${addressToName[address]})`;
+  };
+
+  const ContractWatcher = ({ name, state }) => (
+    <SPanel>
+      <h1>{name}</h1>
+      <p>
+        {name} Address:
+        <AddressLink
+          target="_blank"
+          href={getEtherscanLink(chainId, state.address, "address")}
+        >
+          {getAddressText(state.address)}
+        </AddressLink>
+        <br />
+        {name} Owner Address:
+        <AddressLink
+          target="_blank"
+          href={getEtherscanLink(chainId, state.owner, "address")}
+        >
+          {getAddressText(state.owner)}
+        </AddressLink>
+      </p>
+      <p>
+        Stoneface Address:
+        <AddressLink
+          target="_blank"
+          href={getEtherscanLink(chainId, state.stonefaceAddress, "address")}
+        >
+          {getAddressText(state.stonefaceAddress)}
+        </AddressLink>
+        <br />
+        Stoneface Owner Address:
+        <AddressLink
+          target="_blank"
+          href={getEtherscanLink(chainId, state.stonefaceOwner, "address")}
+        >
+          {getAddressText(state.stonefaceOwner)}
+        </AddressLink>
+        <br />
+        Stoneface Watching Address:
+        <AddressLink
+          target="_blank"
+          href={getEtherscanLink(chainId, state.stonefaceWatching, "address")}
+        >
+          {getAddressText(state.stonefaceWatching)}
+        </AddressLink>
+      </p>
+
+      <SCutout>
+        <p>Ownership Transfers:</p>
+        {state.transfers.length === 0 ? <p>None</p> : null}
+        {state.transfers.map((v) => {
+          return (
+            <div>
+              Target: {getAddressText(v.target)}
+              <br />
+              New Owner: {getAddressText(v.newOwner)}
+              <br />
+              When: {v.when}
+            </div>
+          );
+        })}
+      </SCutout>
+    </SPanel>
+  );
+
+  return (
+    <>
       <GlobalStyles />
       <div
         css={css`
           text-align: center;
+          padding: 40px 15px;
         `}
       >
         <h1 style={{ marginTop: 10, marginBottom: 0 }}>
@@ -133,42 +243,103 @@ const HomePage = ({
             marginBottom: 0,
             fontSize: "1.3rem",
             opacity: 0.6,
-            color: "#000",
             fontStyle: "italic",
           }}
         >
-          hacking the financial system
-        </h2>
-        <h1>
           Stoneface executes critical Rootkit contracts with a time delay. This
-          makes Rootkit effectively rug-proof.
-        </h1>
-        <Panel>
-          <h1>Distribution Watcher:</h1>
+          makes Rootkit effectively rugproof.
+        </h2>
+        <br />
+        <br />
+        <br />
+        <div
+          css={css`
+            text-align: center;
+          `}
+        >
+          <div
+            css={css`
+              margin: auto;
+              max-width: 500px;
+              text-align: left;
+            `}
+          >
+            <ConnectWallet />
+          </div>
+        </div>
+        <SPanel>
+          <h1>General</h1>
           <p>
-            Distribution Address: 0xB0684173F62815b2121C1030cA2423123bA81905
+            Deployer Address:
+            <AddressLink
+              target="_blank"
+              href={getEtherscanLink(
+                chainId,
+                contractAddresses.DEPLOYER,
+                "address"
+              )}
+            >
+              {getAddressText(contractAddresses.DEPLOYER)}
+            </AddressLink>
           </p>
           <p>
-            7-Day Stoneface Address: 0xB0684173F62815b2121C1030cA2423123bA81905
+            7-Day Stoneface Address:
+            <AddressLink
+              target="_blank"
+              href={getEtherscanLink(
+                chainId,
+                contractAddresses.STONEFACE_1,
+                "address"
+              )}
+            >
+              {getAddressText(contractAddresses.STONEFACE_1)}
+            </AddressLink>
           </p>
-        </Panel>
-
-        <Panel>
-          <h1>Vault Watcher:</h1>
-          <p>Vault Address: 0x95c017BeE88284bEf2253E3c347980EF2a0e2ec2</p>
           <p>
-            3-Day Stoneface Address: 0x95c017BeE88284bEf2253E3c347980EF2a0e2ec2
+            3-Day Stoneface Address:
+            <AddressLink
+              target="_blank"
+              href={getEtherscanLink(
+                chainId,
+                contractAddresses.STONEFACE_2,
+                "address"
+              )}
+            >
+              {getAddressText(contractAddresses.STONEFACE_2)}
+            </AddressLink>
           </p>
-        </Panel>
-
-        <h1>Transfer Gate:</h1>
-        <p>Address: 0xBcEd48FD991846E267B02FBC1b7aFE2cc2E483D2</p>
+        </SPanel>
+        <ContractWatcher name="Rootkit" state={rootkitState} />
+        <ContractWatcher name="Distribution" state={distributionState} />
+        <ContractWatcher name="Vault" state={vaultState} />
+        <ContractWatcher name="TransferGate" state={gateState} />
+        <ContractWatcher name="KETH" state={kethState} />
       </div>
-    </Window>
+    </>
   );
 };
 
 export default HomePage;
 
 const GlobalStyles = createGlobalStyle`
+`;
+
+const SPanel = styled(Panel)`
+  width: 100%;
+  margin-bottom: 30px;
+  text-align: left;
+  padding: 15px;
+`;
+
+const SCutout = styled(Cutout)`
+  margin-top: 20px;
+  padding: 10px;
+`;
+
+const AddressLink = styled.a`
+  color: yellow;
+  margin-left: 1rem;
+  :hover {
+    color: orange;
+  }
 `;

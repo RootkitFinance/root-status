@@ -1,7 +1,3 @@
-// import {
-//   TOGGLE_SCAN_LINES,
-// } from "../actions/actionTypes";
-
 import { saveState, loadState } from "../localStorage";
 
 const LOCAL_STORAGE_KEY = "user";
