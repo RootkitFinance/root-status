@@ -154,11 +154,18 @@ const HomePage = () => {
     }
   }, [library, account]);
 
-  const getAddressText = (address) => {
+  const getAddressText = (
+    address,
+    showAddress = true,
+    showNumber = true,
+    showName = true
+  ) => {
     return address
-      ? `${address} (#${Object.keys(addressToName).indexOf(address) + 1} - ${
-          addressToName[address]
-        })`
+      ? `${showAddress ? address + " " : ""}${
+          showNumber
+            ? `#${Object.keys(addressToName).indexOf(address) + 1} - `
+            : ""
+        }${showName ? addressToName[address] : ""}`
       : "Connect wallet...";
   };
 
@@ -171,7 +178,7 @@ const HomePage = () => {
           target="_blank"
           href={getEtherscanLink(chainId, state.address, "address")}
         >
-          {getAddressText(state.address)}
+          {getAddressText(state.address, false)}
         </AddressLink>
         <br />
         {name} Owner Address:
@@ -179,7 +186,7 @@ const HomePage = () => {
           target="_blank"
           href={getEtherscanLink(chainId, state.owner, "address")}
         >
-          {getAddressText(state.owner)}
+          {getAddressText(state.owner, false)}
         </AddressLink>
       </p>
       <p>
@@ -188,7 +195,7 @@ const HomePage = () => {
           target="_blank"
           href={getEtherscanLink(chainId, state.stonefaceAddress, "address")}
         >
-          {getAddressText(state.stonefaceAddress)}
+          {getAddressText(state.stonefaceAddress, false)}
         </AddressLink>
         <br />
         Stoneface Owner Address:
@@ -196,7 +203,7 @@ const HomePage = () => {
           target="_blank"
           href={getEtherscanLink(chainId, state.stonefaceOwner, "address")}
         >
-          {getAddressText(state.stonefaceOwner)}
+          {getAddressText(state.stonefaceOwner, false)}
         </AddressLink>
         <br />
         Stoneface Watching Address:
@@ -204,7 +211,7 @@ const HomePage = () => {
           target="_blank"
           href={getEtherscanLink(chainId, state.stonefaceWatching, "address")}
         >
-          {getAddressText(state.stonefaceWatching)}
+          {getAddressText(state.stonefaceWatching, false)}
         </AddressLink>
       </p>
 
@@ -271,46 +278,22 @@ const HomePage = () => {
           </div>
         </div>
         <SPanel>
-          <h1>General</h1>
-          <p>
-            Deployer Address:
-            <AddressLink
-              target="_blank"
-              href={getEtherscanLink(
-                chainId,
-                contractAddresses.DEPLOYER,
-                "address"
-              )}
-            >
-              {getAddressText(contractAddresses.DEPLOYER)}
-            </AddressLink>
-          </p>
-          <p>
-            7-Day Stoneface Address:
-            <AddressLink
-              target="_blank"
-              href={getEtherscanLink(
-                chainId,
-                contractAddresses.STONEFACE_1,
-                "address"
-              )}
-            >
-              {getAddressText(contractAddresses.STONEFACE_1)}
-            </AddressLink>
-          </p>
-          <p>
-            3-Day Stoneface Address:
-            <AddressLink
-              target="_blank"
-              href={getEtherscanLink(
-                chainId,
-                contractAddresses.STONEFACE_2,
-                "address"
-              )}
-            >
-              {getAddressText(contractAddresses.STONEFACE_2)}
-            </AddressLink>
-          </p>
+          <h1>Contracts</h1>
+          {Object.keys(contractAddresses).map((key, index) => (
+            <p>
+              {index + 1}. {key}:
+              <AddressLink
+                target="_blank"
+                href={getEtherscanLink(
+                  chainId,
+                  contractAddresses[key],
+                  "address"
+                )}
+              >
+                {getAddressText(contractAddresses[key], true, false, false)}
+              </AddressLink>
+            </p>
+          ))}
         </SPanel>
         <ContractWatcher name="Rootkit" state={rootkitState} />
         <ContractWatcher name="Distribution" state={distributionState} />
