@@ -62,13 +62,13 @@ const HomePage = () => {
     address: contractAddresses.STONEFACE_1,
     owner: undefined,
     watching: undefined,
-    transfers: [],
+    transfers: undefined,
   });
   const [stoneface2State, setStoneface2State] = useState({
     address: contractAddresses.STONEFACE_2,
     owner: undefined,
     watching: undefined,
-    transfers: [],
+    transfers: undefined,
   });
 
   useEffect(() => {
@@ -118,10 +118,19 @@ const HomePage = () => {
         const { address } = state;
         const contract = getContract(address, abi, library, account);
 
+        state.owner = await contract.owner();
+        state.watching = await contract.rootKitDistribution();
+
+        onLoad({
+          ...state,
+        });
+
         const logs = await library.getLogs({
           address,
           fromBlock: 10961240,
         });
+
+        state.transfers = [];
 
         for (const log of logs) {
           const event = contract.interface.parseLog(log);
@@ -131,16 +140,13 @@ const HomePage = () => {
             const newOwner = event.args.newOwner;
             const when = event.args.when.toNumber();
 
-            state.transfer.push({
+            state.transfers.push({
               target,
               newOwner,
               when,
             });
           }
         }
-
-        state.owner = await contract.owner();
-        state.watching = await contract.rootKitDistribution();
 
         onLoad({
           ...state,
@@ -245,18 +251,33 @@ const HomePage = () => {
         `}
       >
         <p>Ownership Transfers:</p>
-        {state.transfers.length === 0 ? <p>None</p> : null}
-        {state.transfers.map((v) => {
-          return (
-            <div>
-              Target: {getAddressText(v.target)}
-              <br />
-              New Owner: {getAddressText(v.newOwner)}
-              <br />
-              When: {v.when}
-            </div>
-          );
-        })}
+        {state.transfers === undefined ? <p>Loading...</p> : null}
+        {state.transfers && state.transfers.length === 0 ? <p>None</p> : null}
+        {state.transfers
+          ? state.transfers.map((v, i) => {
+              return (
+                <div key={i}>
+                  Target:
+                  <AddressLink
+                    target="_blank"
+                    href={getEtherscanLink(chainId, v.target, "address")}
+                  >
+                    {getAddressText(v.target, false)}
+                  </AddressLink>
+                  <br />
+                  New Owner:
+                  <AddressLink
+                    target="_blank"
+                    href={getEtherscanLink(chainId, v.newOwner, "address")}
+                  >
+                    {getAddressText(v.newOwner, false)}
+                  </AddressLink>
+                  <br />
+                  When: {v.when}
+                </div>
+              );
+            })
+          : null}
       </div>
     </div>
   );
@@ -312,7 +333,7 @@ const HomePage = () => {
         >
           <h1>Address List</h1>
           {Object.keys(contractAddresses).map((key, index) => (
-            <p>
+            <p key={key}>
               #{index + 1} - {key}:
               <AddressLink
                 target="_blank"
