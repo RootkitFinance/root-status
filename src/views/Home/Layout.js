@@ -170,7 +170,12 @@ const HomePage = () => {
   };
 
   const ContractWatcher = ({ name, state }) => (
-    <SPanel>
+    <div
+      css={css`
+        text-align: left;
+        padding: 40px 0;
+      `}
+    >
       <h1>{name}</h1>
       <p>
         {name} Address:
@@ -215,7 +220,11 @@ const HomePage = () => {
         </AddressLink>
       </p>
 
-      <SCutout>
+      <div
+        css={css`
+          padding: 10px 0;
+        `}
+      >
         <p>Ownership Transfers:</p>
         {state.transfers.length === 0 ? <p>None</p> : null}
         {state.transfers.map((v) => {
@@ -229,8 +238,8 @@ const HomePage = () => {
             </div>
           );
         })}
-      </SCutout>
-    </SPanel>
+      </div>
+    </div>
   );
 
   return (
@@ -239,7 +248,7 @@ const HomePage = () => {
       <div
         css={css`
           text-align: center;
-          padding: 40px 15px;
+          padding: 50px 30px;
         `}
       >
         <h1 style={{ marginTop: 10, marginBottom: 0 }}>
@@ -277,7 +286,13 @@ const HomePage = () => {
             <ConnectWallet />
           </div>
         </div>
-        <SPanel>
+        <div
+          css={css`
+            text-align: left;
+            margin-bottom: 20px;
+            padding: 40px 0;
+          `}
+        >
           <h1>Contracts</h1>
           {Object.keys(contractAddresses).map((key, index) => (
             <p>
@@ -294,7 +309,7 @@ const HomePage = () => {
               </AddressLink>
             </p>
           ))}
-        </SPanel>
+        </div>
         <ContractWatcher name="Rootkit" state={rootkitState} />
         <ContractWatcher name="Distribution" state={distributionState} />
         <ContractWatcher name="Vault" state={vaultState} />
