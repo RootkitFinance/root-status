@@ -12,8 +12,9 @@ import RootkitDistributionABI from "../../contracts/abi/RootKitDistribution.json
 import StonefaceABI from "../../contracts/abi/Stoneface.json";
 import RootkitVaultABI from "../../contracts/abi/RootKitVault.json";
 import RootkitTransferGateABI from "../../contracts/abi/RootKitTransferGate.json";
+import RootkitFloorCalculatorABI from "../../contracts/abi/RootKitFloorCalculator.json";
+import RootABI from "../../contracts/abi/RootKit.json";
 import KethABI from "../../contracts/abi/KETH.json";
-import RootkitABI from "../../contracts/abi/RootKit.json";
 
 const contractAddresses = {
   DEPLOYER: "0x804CC8D469483d202c69752ce0304F71ae14ABdf",
@@ -23,9 +24,9 @@ const contractAddresses = {
   DISTRIBUTION: "0xdc436261C356E136b1671442d0bD0Ae183a6d77D",
   VAULT: "0xaa360Bd89Ac14533940114cf7205DdF5e0CA7fa6",
   TRANSFER_GATE: "0xbFDF833E65Bd8B27c84fbE55DD17F7648C532168",
-  KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
   FLOOR_CALCULATOR: "0x621642243CC6bE2D18b451e2386c52d1e9f7eDF6",
-  ROOTKIT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
+  ROOT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
+  KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
 };
 
 const addressToName = Object.assign(
@@ -37,26 +38,6 @@ const HomePage = () => {
   const chainId = 1;
   const { library, account } = useActiveWeb3React();
 
-  const [distributionState, setDistributionState] = useState({
-    address: contractAddresses.DISTRIBUTION,
-    owner: undefined,
-  });
-  const [vaultState, setVaultState] = useState({
-    address: contractAddresses.VAULT,
-    owner: undefined,
-  });
-  const [gateState, setGateState] = useState({
-    address: contractAddresses.TRANSFER_GATE,
-    owner: undefined,
-  });
-  const [kethState, setKethState] = useState({
-    address: contractAddresses.KETH,
-    owner: undefined,
-  });
-  const [rootkitState, setRootkitState] = useState({
-    address: contractAddresses.ROOTKIT,
-    owner: undefined,
-  });
   const [stoneface1State, setStoneface1State] = useState({
     address: contractAddresses.STONEFACE_1,
     owner: undefined,
@@ -68,6 +49,30 @@ const HomePage = () => {
     owner: undefined,
     watching: undefined,
     transfers: undefined,
+  });
+  const [distributionState, setDistributionState] = useState({
+    address: contractAddresses.DISTRIBUTION,
+    owner: undefined,
+  });
+  const [vaultState, setVaultState] = useState({
+    address: contractAddresses.VAULT,
+    owner: undefined,
+  });
+  const [transferGateState, setTransferGateState] = useState({
+    address: contractAddresses.TRANSFER_GATE,
+    owner: undefined,
+  });
+  const [floorCalculatorState, setFloorCalculatorState] = useState({
+    address: contractAddresses.TRANSFER_GATE,
+    owner: undefined,
+  });
+  const [rootState, setRootState] = useState({
+    address: contractAddresses.ROOT,
+    owner: undefined,
+  });
+  const [kethState, setKethState] = useState({
+    address: contractAddresses.KETH,
+    owner: undefined,
   });
 
   useEffect(() => {
@@ -96,21 +101,27 @@ const HomePage = () => {
       });
 
       loadState({
-        state: gateState,
+        state: transferGateState,
         abi: RootkitTransferGateABI,
-        onLoad: setGateState,
+        onLoad: setTransferGateState,
+      });
+
+      loadState({
+        state: floorCalculatorState,
+        abi: RootkitFloorCalculatorABI,
+        onLoad: setFloorCalculatorState,
+      });
+
+      loadState({
+        state: rootState,
+        abi: RootABI,
+        onLoad: setRootState,
       });
 
       loadState({
         state: kethState,
         abi: KethABI,
         onLoad: setKethState,
-      });
-
-      loadState({
-        state: rootkitState,
-        abi: RootkitABI,
-        onLoad: setRootkitState,
       });
 
       async function loadStonefaceState({ state, abi, onLoad }) {
@@ -353,10 +364,11 @@ const HomePage = () => {
         </div>
         <StonefaceWatcher name="Stoneface1" state={stoneface1State} />
         <StonefaceWatcher name="Stoneface2" state={stoneface2State} />
-        <ContractWatcher name="Rootkit" state={rootkitState} />
         <ContractWatcher name="Distribution" state={distributionState} />
         <ContractWatcher name="Vault" state={vaultState} />
-        <ContractWatcher name="TransferGate" state={gateState} />
+        <ContractWatcher name="TransferGate" state={transferGateState} />
+        <ContractWatcher name="FloorCalculator" state={transferGateState} />
+        <ContractWatcher name="ROOT" state={rootState} />
         <ContractWatcher name="KETH" state={kethState} />
       </div>
     </>
