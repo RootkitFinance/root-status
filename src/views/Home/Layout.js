@@ -23,7 +23,7 @@ const contractAddresses = {
   LIQUIDITY_GENERATION: "0x4C66a6f06B8bC4243479121A4eF0061650e5D137",
   DISTRIBUTION: "0xdc436261C356E136b1671442d0bD0Ae183a6d77D",
   VAULT: "0xaa360Bd89Ac14533940114cf7205DdF5e0CA7fa6",
-  GATE: "0xbFDF833E65Bd8B27c84fbE55DD17F7648C532168",
+  TRANSFER_GATE: "0xbFDF833E65Bd8B27c84fbE55DD17F7648C532168",
   KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
   FLOOR_CALCULATOR: "0x621642243CC6bE2D18b451e2386c52d1e9f7eDF6",
   ROOTKIT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
@@ -42,80 +42,43 @@ const HomePage = () => {
   const [distributionState, setDistributionState] = useState({
     address: contractAddresses.DISTRIBUTION,
     owner: undefined,
-    stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: undefined,
-    stonefaceWatching: undefined,
-    transfers: [],
   });
   const [vaultState, setVaultState] = useState({
     address: contractAddresses.VAULT,
     owner: undefined,
-    stonefaceAddress: contractAddresses.STONEFACE_2,
-    stonefaceOwner: undefined,
-    stonefaceWatching: undefined,
-    transfers: [],
   });
   const [gateState, setGateState] = useState({
-    address: contractAddresses.GATE,
+    address: contractAddresses.TRANSFER_GATE,
     owner: undefined,
-    stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: undefined,
-    stonefaceWatching: undefined,
-    transfers: [],
   });
   const [kethState, setKethState] = useState({
     address: contractAddresses.KETH,
     owner: undefined,
-    stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: undefined,
-    stonefaceWatching: undefined,
-    transfers: [],
   });
   const [rootkitState, setRootkitState] = useState({
     address: contractAddresses.ROOTKIT,
     owner: undefined,
-    stonefaceAddress: contractAddresses.STONEFACE_1,
-    stonefaceOwner: undefined,
-    stonefaceWatching: undefined,
+  });
+  const [stoneface1State, setStoneface1State] = useState({
+    address: contractAddresses.STONEFACE_1,
+    owner: undefined,
+    watching: undefined,
+    transfers: [],
+  });
+  const [stoneface2State, setStoneface2State] = useState({
+    address: contractAddresses.STONEFACE_2,
+    owner: undefined,
+    watching: undefined,
     transfers: [],
   });
 
   useEffect(() => {
     if (library && account) {
       async function loadState({ state, abi, onLoad }) {
-        const { address, stonefaceAddress } = state;
+        const { address } = state;
         const contract = getContract(address, abi, library, account);
-        const stonefaceContract = getContract(
-          stonefaceAddress,
-          StonefaceABI,
-          library,
-          account
-        );
-
-        const logs = await library.getLogs({
-          address,
-          fromBlock: 10961240,
-        });
-
-        for (const log of logs) {
-          const event = contract.interface.parseLog(log);
-
-          if (event.name === "PendingOwnershipTransfer") {
-            const target = event.args.target;
-            const newOwner = event.args.newOwner;
-            const when = event.args.when.toNumber();
-
-            state.transfer.push({
-              target,
-              newOwner,
-              when,
-            });
-          }
-        }
 
         state.owner = await contract.owner();
-        state.stonefaceWatching = await stonefaceContract.rootKitDistribution();
-        state.stonefaceOwner = await stonefaceContract.owner();
 
         onLoad({
           ...state,
@@ -150,6 +113,51 @@ const HomePage = () => {
         state: rootkitState,
         abi: RootkitABI,
         onLoad: setRootkitState,
+      });
+
+      async function loadStonefaceState({ state, abi, onLoad }) {
+        const { address } = state;
+        const contract = getContract(address, abi, library, account);
+
+        const logs = await library.getLogs({
+          address,
+          fromBlock: 10961240,
+        });
+
+        for (const log of logs) {
+          const event = contract.interface.parseLog(log);
+
+          if (event.name === "PendingOwnershipTransfer") {
+            const target = event.args.target;
+            const newOwner = event.args.newOwner;
+            const when = event.args.when.toNumber();
+
+            state.transfer.push({
+              target,
+              newOwner,
+              when,
+            });
+          }
+        }
+
+        state.owner = await contract.owner();
+        state.watching = await contract.rootKitDistribution();
+
+        onLoad({
+          ...state,
+        });
+      }
+
+      loadStonefaceState({
+        state: stoneface1State,
+        abi: StonefaceABI,
+        onLoad: setStoneface1State,
+      });
+
+      loadStonefaceState({
+        state: stoneface2State,
+        abi: StonefaceABI,
+        onLoad: setStoneface2State,
       });
     }
   }, [library, account]);
@@ -194,29 +202,41 @@ const HomePage = () => {
           {getAddressText(state.owner, false)}
         </AddressLink>
       </p>
+    </div>
+  );
+
+  const StonefaceWatcher = ({ name, state }) => (
+    <div
+      css={css`
+        text-align: left;
+        margin-bottom: 20px;
+        padding: 20px 0;
+      `}
+    >
+      <h1>{name}</h1>
       <p>
-        Stoneface Address:
+        {name} Address:
         <AddressLink
           target="_blank"
-          href={getEtherscanLink(chainId, state.stonefaceAddress, "address")}
+          href={getEtherscanLink(chainId, state.address, "address")}
         >
-          {getAddressText(state.stonefaceAddress, false)}
+          {getAddressText(state.address, false)}
         </AddressLink>
         <br />
-        Stoneface Owner Address:
+        {name} Owner Address:
         <AddressLink
           target="_blank"
-          href={getEtherscanLink(chainId, state.stonefaceOwner, "address")}
+          href={getEtherscanLink(chainId, state.owner, "address")}
         >
-          {getAddressText(state.stonefaceOwner, false)}
+          {getAddressText(state.owner, false)}
         </AddressLink>
         <br />
-        Stoneface Watching Address:
+        {name} Watching Address:
         <AddressLink
           target="_blank"
-          href={getEtherscanLink(chainId, state.stonefaceWatching, "address")}
+          href={getEtherscanLink(chainId, state.watching, "address")}
         >
-          {getAddressText(state.stonefaceWatching, false)}
+          {getAddressText(state.watching, false)}
         </AddressLink>
       </p>
 
@@ -310,6 +330,8 @@ const HomePage = () => {
             </p>
           ))}
         </div>
+        <StonefaceWatcher name="Stoneface1" state={stoneface1State} />
+        <StonefaceWatcher name="Stoneface2" state={stoneface2State} />
         <ContractWatcher name="Rootkit" state={rootkitState} />
         <ContractWatcher name="Distribution" state={distributionState} />
         <ContractWatcher name="Vault" state={vaultState} />
