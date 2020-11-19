@@ -15,6 +15,9 @@ import RootkitTransferGateABI from "../../contracts/abi/RootKitTransferGate.json
 import RootkitFloorCalculatorABI from "../../contracts/abi/RootKitFloorCalculator.json";
 import RootABI from "../../contracts/abi/RootKit.json";
 import KethABI from "../../contracts/abi/KETH.json";
+import MoneyButtonABI from "../../contracts/abi/RootKitMoneyButton.json";
+import DirectABI from "../../contracts/abi/RootKitDirect.json";
+import WethZapperABI from "../../contracts/abi/RootWethZapper.json";
 
 const contractAddresses = {
   DEPLOYER: "0x804CC8D469483d202c69752ce0304F71ae14ABdf",
@@ -27,6 +30,9 @@ const contractAddresses = {
   FLOOR_CALCULATOR: "0x621642243CC6bE2D18b451e2386c52d1e9f7eDF6",
   ROOT: "0xCb5f72d37685C3D5aD0bB5F982443BC8FcdF570E",
   KETH: "0x1df2099f6AbBf0b05C12a61835137D84F10DAA96",
+  MONEY_BUTTON: "0x7803B983492EB76406BDbF222D77937198ABa03c",
+  DIRECT: "0x1DDDbC37231965897d4131BdbA0ade7069d28AB0",
+  WETH_ZAPPER: "0x6342de49eA6795e24fafb4Bda3ac13a021FbE014",
 };
 
 const addressToName = Object.assign(
@@ -82,6 +88,21 @@ const HomePage = () => {
     address: contractAddresses.KETH,
     owner: undefined,
   });
+  const [moneyButtonState, setMoneyButtonState] = useState({
+    name: "MONEY_BUTTON",
+    address: contractAddresses.MONEY_BUTTON,
+    owner: undefined,
+  });
+  const [directState, setDirectState] = useState({
+    name: "DIRECT",
+    address: contractAddresses.DIRECT,
+    owner: undefined,
+  });
+  const [wethZapperState, setWethZapperState] = useState({
+    name: "WETH_ZAPPER",
+    address: contractAddresses.WETH_ZAPPER,
+    owner: undefined,
+  });
 
   useEffect(() => {
     if (library && account) {
@@ -132,6 +153,24 @@ const HomePage = () => {
         onLoad: setKethState,
       });
 
+      loadState({
+        state: moneyButtonState,
+        abi: MoneyButtonABI,
+        onLoad: setMoneyButtonState,
+      });
+
+      loadState({
+        state: directState,
+        abi: DirectABI,
+        onLoad: setDirectState,
+      });
+
+      loadState({
+        state: wethZapperState,
+        abi: WethZapperABI,
+        onLoad: setWethZapperState,
+      });
+
       async function loadStonefaceState({ state, abi, onLoad }) {
         const { address } = state;
         const contract = getContract(address, abi, library, account);
@@ -156,7 +195,7 @@ const HomePage = () => {
           if (event.name === "PendingOwnershipTransfer") {
             const target = event.args.target;
             const newOwner = event.args.newOwner;
-            const when = event.args.when.toNumber();
+            const when = new Date(event.args.when.toNumber() * 1000) + "";
 
             state.transfers.push({
               target,
@@ -243,6 +282,21 @@ const HomePage = () => {
             setJengaCount and distribute, which are used to end the sale and
             complete the distribution. There is no opportunity to rug.)
           </Note>
+        ) : state.name === "MONEY_BUTTON" ? (
+          <Note>
+            (The owner doesn't matter, as it has no access to funds. There is no
+            opportunity to rug.)
+          </Note>
+        ) : state.name === "DIRECT" ? (
+          <Note>
+            (The owner doesn't matter, as it has no access to funds. There is no
+            opportunity to rug.)
+          </Note>
+        ) : state.name === "WETH_ZAPPER" ? (
+          <Note>
+            (The owner doesn't matter, as it has no access to funds. There is no
+            opportunity to rug.)
+          </Note>
         ) : null}
       </p>
     </div>
@@ -293,7 +347,7 @@ const HomePage = () => {
 
       <div
         css={css`
-          padding: 10px 0;
+          padding: 10px 0 0 30px;
         `}
       >
         <p>Ownership Transfers:</p>
@@ -302,7 +356,7 @@ const HomePage = () => {
         {state.transfers
           ? state.transfers.map((v, i) => {
               return (
-                <div key={i}>
+                <p key={i}>
                   Target:
                   <AddressLink
                     target="_blank"
@@ -320,7 +374,7 @@ const HomePage = () => {
                   </AddressLink>
                   <br />
                   When: {v.when}
-                </div>
+                </p>
               );
             })
           : null}
@@ -402,6 +456,9 @@ const HomePage = () => {
         <ContractWatcher name="FloorCalculator" state={floorCalculatorState} />
         <ContractWatcher name="ROOT" state={rootState} />
         <ContractWatcher name="KETH" state={kethState} />
+        <ContractWatcher name="MoneyButton" state={moneyButtonState} />
+        <ContractWatcher name="Direct" state={directState} />
+        <ContractWatcher name="WethZapper" state={wethZapperState} />
       </div>
     </>
   );
