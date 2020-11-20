@@ -18,6 +18,9 @@ import KethABI from "../../contracts/abi/KETH.json";
 import MoneyButtonABI from "../../contracts/abi/RootKitMoneyButton.json";
 import DirectABI from "../../contracts/abi/RootKitDirect.json";
 import WethZapperABI from "../../contracts/abi/RootWethZapper.json";
+import RootkitLiquidityABI from "../../contracts/abi/RootKitLiquidity.json";
+import IUniswapV2PairABI from "../../contracts/abi/IUniswapV2Pair.json";
+import ERC20ABI from "../../contracts/abi/ERC20.json";
 
 const contractAddresses = {
   DEPLOYER: "0x804CC8D469483d202c69752ce0304F71ae14ABdf",
@@ -33,6 +36,13 @@ const contractAddresses = {
   MONEY_BUTTON: "0x7803B983492EB76406BDbF222D77937198ABa03c",
   DIRECT: "0x1DDDbC37231965897d4131BdbA0ade7069d28AB0",
   WETH_ZAPPER: "0x6342de49eA6795e24fafb4Bda3ac13a021FbE014",
+  STAKING: "0x39E9fB78b543748950827BF4c606F58724b67a80",
+  KETH_POOL: "0x0617d5ffb29c03ac35f1863b8a50ce1b52d446f6",
+  KETH_POOL_WRAPPER: "0xBfBb9B401114e367f7E174cDF4FBb8Fcc0585fcc",
+  WBTC_POOL: "0x920c87d8b3cc675d6acff2830becf76d55bc974c",
+  WBTC_POOL_WRAPPER: "0xBabc2015dAb61008f5E248DD3511Fd46a4103418",
+  WETH_POOL: "0x01f8989c1e556f5c89c7D46786dB98eEAAe82c33",
+  WETH_POOL_WRAPPER: "0x12a06769C5a8881aafb4eA0F6D8b7Ad79EaEBc35",
 };
 
 const addressToName = Object.assign(
@@ -103,6 +113,36 @@ const HomePage = () => {
     address: contractAddresses.WETH_ZAPPER,
     owner: undefined,
   });
+  const [kethPoolState, setKethPoolState] = useState({
+    name: "KETH_POOL",
+    address: contractAddresses.KETH_POOL,
+    owner: undefined,
+  });
+  const [kethPoolWrapperState, setKethPoolWrapperState] = useState({
+    name: "KETH_POOL_WRAPPER",
+    address: contractAddresses.KETH_POOL_WRAPPER,
+    owner: undefined,
+  });
+  const [wbtcPoolState, setWbtcPoolState] = useState({
+    name: "WBTC_POOL",
+    address: contractAddresses.WBTC_POOL,
+    owner: undefined,
+  });
+  const [wbtcPoolWrapperState, setWbtcPoolWrapperState] = useState({
+    name: "WBTC_POOL_WRAPPER",
+    address: contractAddresses.WBTC_POOL_WRAPPER,
+    owner: undefined,
+  });
+  const [wethPoolState, setWethPoolState] = useState({
+    name: "WETH_POOL",
+    address: contractAddresses.WETH_POOL,
+    owner: undefined,
+  });
+  const [wethPoolWrapperState, setWethPoolWrapperState] = useState({
+    name: "WETH_POOL_WRAPPER",
+    address: contractAddresses.WETH_POOL_WRAPPER,
+    owner: undefined,
+  });
 
   useEffect(() => {
     if (library && account) {
@@ -110,7 +150,7 @@ const HomePage = () => {
         const { address } = state;
         const contract = getContract(address, abi, library, account);
 
-        state.owner = await contract.owner();
+        state.owner = contract.owner ? await contract.owner() : undefined;
 
         onLoad({
           ...state,
@@ -169,6 +209,42 @@ const HomePage = () => {
         state: wethZapperState,
         abi: WethZapperABI,
         onLoad: setWethZapperState,
+      });
+
+      loadState({
+        state: kethPoolState,
+        abi: IUniswapV2PairABI,
+        onLoad: setKethPoolState,
+      });
+
+      loadState({
+        state: kethPoolWrapperState,
+        abi: RootkitLiquidityABI,
+        onLoad: setKethPoolWrapperState,
+      });
+
+      loadState({
+        state: wbtcPoolState,
+        abi: IUniswapV2PairABI,
+        onLoad: setWbtcPoolState,
+      });
+
+      loadState({
+        state: wbtcPoolWrapperState,
+        abi: RootkitLiquidityABI,
+        onLoad: setWbtcPoolWrapperState,
+      });
+
+      loadState({
+        state: wethPoolState,
+        abi: IUniswapV2PairABI,
+        onLoad: setWethPoolState,
+      });
+
+      loadState({
+        state: wethPoolWrapperState,
+        abi: RootkitLiquidityABI,
+        onLoad: setWethPoolWrapperState,
       });
 
       async function loadStonefaceState({ state, abi, onLoad }) {
@@ -257,12 +333,16 @@ const HomePage = () => {
         </AddressLink>
         <br />
         Owner:
-        <AddressLink
-          target="_blank"
-          href={getEtherscanLink(chainId, state.owner, "address")}
-        >
-          {getAddressText(state.owner, false)}
-        </AddressLink>
+        {state.owner ? (
+          <AddressLink
+            target="_blank"
+            href={getEtherscanLink(chainId, state.owner, "address")}
+          >
+            {getAddressText(state.owner, false)}
+          </AddressLink>
+        ) : (
+          <> None</>
+        )}
         {state.name === "FLOOR_CALCULATOR" ? (
           <Note>
             (The owner doesn't matter because there aren't any owner-only
@@ -459,6 +539,12 @@ const HomePage = () => {
         <ContractWatcher name="MoneyButton" state={moneyButtonState} />
         <ContractWatcher name="Direct" state={directState} />
         <ContractWatcher name="WethZapper" state={wethZapperState} />
+        <ContractWatcher name="KethPool" state={kethPoolState} />
+        <ContractWatcher name="KethPoolWrapper" state={kethPoolWrapperState} />
+        <ContractWatcher name="WbtcPool" state={wbtcPoolState} />
+        <ContractWatcher name="WbtcPoolWrapper" state={wbtcPoolWrapperState} />
+        <ContractWatcher name="WethPool" state={wethPoolState} />
+        <ContractWatcher name="WethPoolWrapper" state={wethPoolWrapperState} />
       </div>
     </>
   );
